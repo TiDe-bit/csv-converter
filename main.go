@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/tushar2708/altcsv"
 	"os"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/tushar2708/altcsv"
 )
 
 const inDir = "operation"
@@ -13,6 +14,7 @@ const inDir = "operation"
 func main() {
 	dir, err := os.ReadDir(inDir)
 	if err != nil {
+		os.Mkdir(inDir, 0700)
 		log.Fatalln(log.WithError(err))
 	}
 
@@ -40,7 +42,6 @@ func main() {
 		writer.UseCRLF = true
 		writer.AllQuotes = true
 
-
 		writers[i] = *writer
 		defer writer.Flush()
 	}
@@ -64,15 +65,12 @@ func write(w *altcsv.Writer, name string) {
 		newRow := make([]string, 0)
 
 		for _, field := range emptyRow {
-			newField :=   field
+			newField := field
 			//newField := fmt.Sprintf(`'%v'`, field)
 			//newField = strings.Replace(newField, "'", "\042",2)
-			 newRow = append(newRow,newField)
-			 //emptyRow = append(emptyRow, fmt.Sprintf("%q", field))
-		 }
-
-
-
+			newRow = append(newRow, newField)
+			//emptyRow = append(emptyRow, fmt.Sprintf("%q", field))
+		}
 
 		noKD := strings.Split(sourceStrings[7], " KD"+
 			" ")

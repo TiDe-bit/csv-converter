@@ -11,8 +11,8 @@ csv-converter.exe
 
 ## Usage 
 For normal operation copy the unconverted File or Files in the `operation` folder
-[ ] Automatic initalization of the operation folder
+[x] Automatic initalization of the operation folder
 
-## Future
-[ ] Use Github actions for several exports
-[ ] Sign the .exe file
+## Future  
+- [ ] Use Github actions for several exports  
+- [ ] Sign the .exe file  
