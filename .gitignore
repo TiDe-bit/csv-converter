@@ -5,6 +5,12 @@
 *.so
 *.dylib
 
+*csv
+
+bin
+operation
+backup
+
 # Test binary, built with `go test -c`
 *.test
 
