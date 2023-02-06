@@ -1,108 +1,37 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"strings"
+	"changeme/pkg/app"
+	"embed"
 
-	log "github.com/sirupsen/logrus"
-	"github.com/tushar2708/altcsv"
+	"github.com/wailsapp/wails/v2"
+	"github.com/wailsapp/wails/v2/pkg/options"
+	"github.com/wailsapp/wails/v2/pkg/options/assetserver"
 )
 
-const inDir = "operation"
+//go:embed all:frontend/dist
+var assets embed.FS
 
 func main() {
-	dir, err := os.ReadDir(inDir)
-	if err != nil {
-		os.Mkdir(inDir, 0700)
-		log.Fatalln(log.WithError(err))
-	}
+	// Create an instance of the application structure
+	application := app.Create()
 
-	err = os.Chdir(inDir)
-	if err != nil {
-		log.Fatalln(log.WithError(err))
-	}
-
-	writers := make([]altcsv.Writer, len(dir))
-	for i, f := range dir {
-		//out, err := os.OpenFile(f.Name(), os.O_WRONLY, 0600)
-		log.Info(f.Name(), "\tGenerated?\t", strings.Contains(f.Name(), "NEW"))
-		if strings.Contains(f.Name(), "NEW") {
-			log.Info("Generated File Found")
-			continue
-		}
-
-		fileName := strings.Split(f.Name(), ".")[0] + " - NEW.csv"
-
-		out, err := os.Create(fileName)
-		if err != nil {
-			log.Fatal(log.WithError(err))
-		}
-		writer := altcsv.NewWriter(out)
-		writer.UseCRLF = true
-		writer.AllQuotes = true
-
-		writers[i] = *writer
-		defer writer.Flush()
-	}
-
-	log.Infof("%v Files", len(dir))
-
-	for i, d := range dir {
-		w := writers[i]
-		write(&w, d.Name())
-	}
-}
-
-func write(w *altcsv.Writer, name string) {
-	recordsSource, err := readData(name)
-	if err != nil {
-		log.Fatalln(log.WithError(err))
-	}
-
-	for _, sourceStrings := range recordsSource {
-		emptyRow := sourceStrings
-		newRow := make([]string, 0)
-
-		for _, field := range emptyRow {
-			newField := field
-			//newField := fmt.Sprintf(`'%v'`, field)
-			//newField = strings.Replace(newField, "'", "\042",2)
-			newRow = append(newRow, newField)
-			//emptyRow = append(emptyRow, fmt.Sprintf("%q", field))
-		}
-
-		noKD := strings.Split(sourceStrings[7], " KD"+
-			" ")
-
-		newField := fmt.Sprintf("%v - %v", noKD[0], sourceStrings[115])
-
-		newRow[7] = newField
-
-		err = w.Write(newRow)
-		if err != nil {
-			log.Fatalln(log.WithError(err))
-		}
-	}
-}
-
-func readData(fileName string) ([][]string, error) {
-
-	f, err := os.Open(fileName)
+	// Create application with options
+	err := wails.Run(&options.App{
+		Title:  "converter",
+		Width:  1024,
+		Height: 768,
+		AssetServer: &assetserver.Options{
+			Assets: assets,
+		},
+		BackgroundColour: &options.RGBA{R: 27, G: 38, B: 54, A: 1},
+		OnStartup:        application.Startup,
+		Bind: []any{
+			application,
+		},
+	})
 
 	if err != nil {
-		return [][]string{}, err
+		println("Error:", err.Error())
 	}
-
-	defer f.Close()
-
-	r := altcsv.NewReader(f)
-
-	records, err := r.ReadAll()
-
-	if err != nil {
-		return [][]string{}, err
-	}
-
-	return records, nil
 }
