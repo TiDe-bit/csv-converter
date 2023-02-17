@@ -10,6 +10,10 @@ export function Convert() {
   return window['go']['app']['App']['Convert']();
 }
 
+export function GetSavedOptions() {
+  return window['go']['app']['App']['GetSavedOptions']();
+}
+
 export function LoadOptions() {
   return window['go']['app']['App']['LoadOptions']();
 }

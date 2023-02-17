@@ -3,10 +3,10 @@ package options
 import (
 	"changeme/pkg/converter"
 	"encoding/json"
-	"fmt"
-	"github.com/sirupsen/logrus"
 	"os"
 	"path"
+
+	"github.com/sirupsen/logrus"
 )
 
 const fileName = "optionen.json"
@@ -26,8 +26,14 @@ func Load() *converter.ConvertOptions {
 
 	bytes, err := os.ReadFile(fileName)
 	if err != nil {
+		logrus.WithError(err).Info("loading options failed")
 		os.Create(fileName)
 		bytes, _ = os.ReadFile(fileName)
+	}
+
+	if len(bytes) == 0 {
+		logrus.Info("no options to load")
+		return nil
 	}
 
 	err = json.Unmarshal(bytes, loadedOptions)
@@ -39,12 +45,20 @@ func Load() *converter.ConvertOptions {
 }
 
 func Save(options *converter.ConvertOptions) {
-	bytes, err := json.Marshal(options)
-	if err != nil {
+	if options == nil {
+		logrus.Info("no settings to save")
 		return
 	}
 
-	fmt.Printf("save options, %s", string(bytes))
+	logrus.Infof("saving options %+v", options)
+
+	bytes, err := json.Marshal(options)
+	if err != nil {
+		logrus.Fatal(err)
+		return
+	}
+
+	logrus.Infof("save options, %s", string(bytes))
 
 	wd, _ := os.Getwd()
 	isInCorrectDir := path.Dir(wd) != "operation"
@@ -55,17 +69,19 @@ func Save(options *converter.ConvertOptions) {
 		return
 	}
 
-	fmt.Printf("options to save %s", bytes)
+	logrus.Infof("options to save %s", bytes)
 
-	file, err := os.Open(fileName)
+	_, err = os.ReadFile(fileName)
 	if err != nil {
-		file, err = os.Create(fileName)
-		logrus.Warning(err)
+		file, err := os.Create(fileName)
+		if err != nil {
+			logrus.Fatal(err)
+		}
+		file.Close()
 	}
-	defer file.Close()
 
 	err = os.WriteFile(fileName, bytes, 0700)
 	if err != nil {
-		logrus.Error(err)
+		logrus.Fatal(err)
 	}
 }

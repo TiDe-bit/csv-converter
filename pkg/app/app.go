@@ -4,6 +4,8 @@ import (
 	"changeme/pkg/converter"
 	"changeme/pkg/options"
 	"context"
+
+	"github.com/sirupsen/logrus"
 )
 
 // App struct
@@ -24,6 +26,11 @@ func (a *App) Startup(ctx context.Context) {
 	a.options = a.LoadOptions()
 }
 
+func (a *App) GetSavedOptions() []*converter.FromToPair {
+	array := make([]*converter.FromToPair, len(a.options.FromToPairs))
+	return array
+}
+
 func (a *App) LoadOptions() *converter.ConvertOptions {
 	return options.Load()
 }
@@ -33,7 +40,6 @@ func (a *App) SpreadColumns() []string {
 }
 
 func (a *App) Convert() {
-	options.Save(a.options)
 	converter.Convert(a.options)
 }
 
@@ -46,6 +52,8 @@ func (a *App) AddOption(from, to int, enableKDIfNew bool) {
 		a.options = converter.WithOptions(enableKDIfNew)
 	}
 	a.options.AddOption(pair)
+	go options.Save(a.options)
+	go logrus.Infof("got %+v", a.options)
 }
 
 func (a *App) RemoveOption(from, to int) {

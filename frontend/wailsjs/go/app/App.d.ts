@@ -6,6 +6,8 @@ export function AddOption(arg1:number,arg2:number,arg3:boolean):Promise<void>;
 
 export function Convert():Promise<void>;
 
+export function GetSavedOptions():Promise<Array<converter.FromToPair>>;
+
 export function LoadOptions():Promise<converter.ConvertOptions>;
 
 export function RemoveOption(arg1:number,arg2:number):Promise<void>;

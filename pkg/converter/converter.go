@@ -2,11 +2,12 @@ package converter
 
 import (
 	"fmt"
-	log "github.com/sirupsen/logrus"
-	"github.com/tushar2708/altcsv"
 	"os"
 	"path"
 	"strings"
+
+	log "github.com/sirupsen/logrus"
+	"github.com/tushar2708/altcsv"
 )
 
 const inDir = "operation"
@@ -31,7 +32,7 @@ func (c *ConvertOptions) AddOption(pair FromToPair) *ConvertOptions {
 	if c.FromToPairs == nil {
 		c.FromToPairs = make(map[string]FromToPair)
 	}
-	c.FromToPairs[fmt.Sprintf("%d-%d", pair.From, pair.To)] = pair
+	c.FromToPairs[fmt.Sprintf("%d", pair.To)] = pair
 	return c
 }
 
@@ -40,10 +41,9 @@ func (c *ConvertOptions) RemoveOption(pair FromToPair) *ConvertOptions {
 	if c.FromToPairs == nil {
 		return c
 	}
-	key := fmt.Sprintf("%d-%d", pair.From, pair.To)
-	_, ok := c.FromToPairs[key]
+	_, ok := c.FromToPairs[fmt.Sprintf("%d", pair.To)]
 	if ok {
-		delete(c.FromToPairs, key)
+		delete(c.FromToPairs, fmt.Sprintf("%d", pair.To))
 	}
 	return c
 }

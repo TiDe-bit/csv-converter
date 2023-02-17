@@ -1,11 +1,17 @@
 import {ReactNode, useState} from 'react';
 import './App.css';
-import {SpreadColumns, AddOption, Convert, RemoveOption} from "../wailsjs/go/app/App";
-import {addOption} from "./addOption";
+import {SpreadColumns,  Convert, GetSavedOptions} from "../wailsjs/go/app/App";
+import { AddOptionElement } from './addOption';
 
 function App() {
     const [OptionThingies, setEndArray] = useState<ReactNode[]>([]);
 
+    GetSavedOptions().then((savedOptions) => {
+        if (savedOptions.length == 0) {
+            return
+        }
+        setEndArray([...OptionThingies, savedOptions.map((option) => <AddOptionElement initialFrom={option.form} initialTo={option.to} />)])
+    }) 
 
     function convert() {
         Convert()
@@ -24,7 +30,7 @@ function App() {
         <div id="App">
             <ul id="rowNames" className="RowNames">{spreadColumns()}</ul>
             <div id="input" className="input-box">
-                <button className="btn" onClick={() => setEndArray([...OptionThingies,addOption()])}>AddOption</button>
+                <button className="btn" onClick={() => setEndArray([...OptionThingies, <AddOptionElement />])}>AddOption</button>
                 <button className="btn" onClick={convert}>Convert</button>
             </div>
             {OptionThingies}
