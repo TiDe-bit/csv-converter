@@ -1,21 +1,49 @@
-import {ReactNode, useState} from 'react';
+import {ReactElement, ReactNode, useEffect, useState} from 'react';
 import './App.css';
-import {SpreadColumns,  Convert, GetSavedOptions} from "../wailsjs/go/app/App";
+import {SpreadColumns, GetSavedOptions, SaveOptions, Convert} from "../wailsjs/go/app/App";
 import { AddOptionElement } from './addOption';
 
-function App() {
-    const [OptionThingies, setEndArray] = useState<ReactNode[]>([]);
 
-    GetSavedOptions().then((savedOptions) => {
-        if (savedOptions.length == 0) {
+export interface FromToFields {
+    From: number
+    To: number
+}
+
+const allOptions = new Map<string, FromToFields>
+
+
+function App() {
+    const [elements, setElements] = useState<ReactElement[]>([])
+    const [optionCount, setOptionCount] = useState(0)
+
+    const setFromToPair = (fromTo: FromToFields, remove?: boolean) => {
+        console.log("add", fromTo, remove)
+        if (remove) {
+            allOptions.delete(fromTo.To.toString())
             return
         }
-        setEndArray([...OptionThingies, savedOptions.map((option) => <AddOptionElement initialFrom={option.form} initialTo={option.to} />)])
-    }) 
-
-    function convert() {
-        Convert()
+        allOptions.set(fromTo.To.toString(), fromTo)
+        setOptionCount(allOptions.size)
+        console.log(optionCount, allOptions)
     }
+
+    useEffect(() => {
+        let savedOptions: FromToFields[] = [];
+        GetSavedOptions().then((value) => {
+            savedOptions = value
+        });
+        savedOptions.forEach((option) => allOptions.set(option.To.toString(), option))
+        setOptionCount(allOptions.size)
+    })
+
+    useEffect(() => {
+        const list: FromToFields[] = []
+        console.log("fuck", list, allOptions)
+        allOptions.forEach((option: FromToFields) => list.push(option))
+        setElements(list.map((fields) => (<>
+            <AddOptionElement setFromToPair={setFromToPair} initialFrom={fields.From} initialTo={fields.To} key={fields.To} />
+        </>)))
+    }, [optionCount])
 
     function  spreadColumns (): ReactNode {
         let columns: string[] = []
@@ -26,14 +54,23 @@ function App() {
         return columns.map((column,  index) => (<li>{index} - {column}</li>))
     }
 
+    const convertAndSave = (): void => {
+        SaveOptions(allOptions.values as any);
+        Convert()
+    }
+
     return (
         <div id="App">
             <ul id="rowNames" className="RowNames">{spreadColumns()}</ul>
             <div id="input" className="input-box">
-                <button className="btn" onClick={() => setEndArray([...OptionThingies, <AddOptionElement />])}>AddOption</button>
-                <button className="btn" onClick={convert}>Convert</button>
+                <button className="btn" onClick={() => {
+                    allOptions.set("0", {From: 0, To: 0})
+                    setOptionCount(allOptions.size)
+                    console.log(allOptions, elements)
+                }}>Add Option</button>
+                <button className="btn" onClick={convertAndSave}>Convert</button>
             </div>
-            {OptionThingies}
+            {elements}
         </div>
     )
 }
