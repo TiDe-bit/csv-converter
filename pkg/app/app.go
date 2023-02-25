@@ -40,8 +40,12 @@ func (a *App) Startup(ctx context.Context) {
 
 func (a *App) GetSavedOptions() []*converter.FromToPair {
 	a.options = options.Load()
-	array := make([]*converter.FromToPair, len(a.options.FromToPairs))
-	logrus.Infof("saved options %+v", array)
+	array := make([]*converter.FromToPair, 0, len(a.options.FromToPairs))
+	logrus.Infof("loaded options %+v", array)
+
+	for _, fromToPair := range a.options.FromToPairs {
+		array = append(array, &fromToPair)
+	}
 	return array
 }
 

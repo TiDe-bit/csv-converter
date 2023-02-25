@@ -1,32 +1,43 @@
 <script lang="ts" setup>
-import {reactive} from 'vue'
-import {Convert} from '../../wailsjs/go/app/App'
+export default {
 
-const data = reactive({
-  from: 0,
-  to: 0,
-})
+  data(from: number, to: number) {
+    import {reactive} from 'vue'
+    import {Convert} from '../../wailsjs/go/app/App'
 
-const saveOption = () => {
+    return {
+      from: 0,
+      to: 0
+    }
+    data.from = from;
+    data.to = to;
   
-}
+    const data = reactive({
+      from: 0,
+      to: 0,
+    })
 
-const deleteOption = () => {
+    const saveOption = () => {
+      
+    }
+
+    const deleteOption = () => {
+      
+    }
   
+  }
 }
 
 </script>
 
 <template>
-  <main>
-    <div id="result" class="result">{{ data.to }}</div>
-    <div id="input" class="input-box">
-      <input id="from" v-model="data.from" autocomplete="off" class="input" type="number"/>
-      <input id="to" v-model="data.to" autocomplete="off" class="input" type="number"/>
-      <button class="btn" @click="saveOption">AddOption</button>
-      <button class="btn" @click="deleteOption">X</button>
-    </div>
-  </main>
+  <div id="result" class="result">{{ data.to }}</div>
+  <div id="input" class="input-box">
+    <input id="from" v-model="data.from" autocomplete="off" class="input" type="number"/>
+    <input id="to" v-model="data.to" autocomplete="off" class="input" type="number"/>
+    <button class="btn" @click="saveOption">AddOption</button>
+    <button class="btn" @click="deleteOption">X</button>
+  </div>
 </template>
 
 <style scoped>
