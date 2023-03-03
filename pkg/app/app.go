@@ -57,9 +57,11 @@ func (a *App) Convert() {
 	converter.Convert(a.options)
 }
 
-func (a *App) SaveOptions(options []MyFromToPair) {
-	logrus.Infof("save this pls %+v", options)
-	for _, option := range options {
+func (a *App) SaveOptions(opts []MyFromToPair) {
+	logrus.Infof("save this pls %+v", opts)
+	for _, option := range opts {
 		a.options.AddOption(option.toConverterFromToPair())
 	}
+
+	options.Save(a.options)
 }

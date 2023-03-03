@@ -1,50 +1,56 @@
 <script lang="ts" setup>
-export default {
-
-  data(from: number, to: number) {
-    import {reactive} from 'vue'
-    import {Convert} from '../../wailsjs/go/app/App'
-
-    return {
-      from: 0,
-      to: 0
-    }
-    data.from = from;
-    data.to = to;
+import { booleanLiteral, numberLiteralTypeAnnotation, STATEMENT_OR_BLOCK_KEYS } from '@babel/types'
+import { def } from '@vue/shared'
+import {reactive} from 'vue'
+import { FromToLike } from '../App.vue';
   
-    const data = reactive({
-      from: 0,
-      to: 0,
-    })
+const {initialFrom = 0, initialTo = 0, setFunction} = defineProps<{
+  initialFrom?: number,
+  initialTo?: number,
+  setFunction: (pair?: FromToLike) => void
+}>()
 
-    const saveOption = () => {
-      
-    }
+const data = reactive({
+  from: initialFrom,
+  to: initialTo,
+  visible: true
+})
 
-    const deleteOption = () => {
-      
-    }
-  
-  }
+const saveOption = () => {
+  setFunction({From: data.from, To: data.to})
 }
 
+const deleteOption = () => {
+  setFunction(undefined)
+  data.visible = false
+}
 </script>
 
-<template>
-  <div id="result" class="result">{{ data.to }}</div>
-  <div id="input" class="input-box">
-    <input id="from" v-model="data.from" autocomplete="off" class="input" type="number"/>
-    <input id="to" v-model="data.to" autocomplete="off" class="input" type="number"/>
-    <button class="btn" @click="saveOption">AddOption</button>
-    <button class="btn" @click="deleteOption">X</button>
+<template name="Option">
+  <div v-if="data.visible" class="container">
+    <div id="result" class="result">{{ data.to }}</div>
+    <div id="input" class="input-box">
+      <input id="from" v-model="data.from" :on-change="() => initialFrom = Math.abs(data.from)" autocomplete="off" class="input" type="number"/>
+      <input id="to" v-model="data.to" :on-change="() => initialTo = Math.abs(data.to)" autocomplete="off" class="input" type="number"/>
+      <button class="btn" @click="saveOption">Save Option</button>
+      <button class="btn" @click="deleteOption">X</button>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.container {
+  display: block;
+}
+
 .result {
-  height: 20px;
   line-height: 20px;
-  margin: 1.5rem auto;
+}
+
+.input-box {
+  display: flex;
+  align-items: start;
+  justify-content: start;
 }
 
 .input-box .btn {

@@ -27,6 +27,9 @@ func Load() *converter.ConvertOptions {
 	bytes, err := os.ReadFile(fileName)
 	if err != nil {
 		logrus.WithError(err).Info("loading options failed")
+		if os.IsNotExist(err) {
+			return nil
+		}
 		os.Create(fileName)
 		bytes, _ = os.ReadFile(fileName)
 	}
@@ -50,16 +53,6 @@ func Save(options *converter.ConvertOptions) {
 		return
 	}
 
-	logrus.Infof("saving options %+v", options)
-
-	bytes, err := json.Marshal(options)
-	if err != nil {
-		logrus.Fatal(err)
-		return
-	}
-
-	logrus.Infof("save options, %s", string(bytes))
-
 	wd, _ := os.Getwd()
 	isInCorrectDir := path.Dir(wd) != "operation"
 
@@ -69,16 +62,26 @@ func Save(options *converter.ConvertOptions) {
 		return
 	}
 
+	logrus.Infof("saving options %+v", options)
+
+	bytes, err := json.Marshal(options)
+	if err != nil {
+		logrus.Fatal(err)
+		return
+	}
+
 	logrus.Infof("options to save %s", bytes)
 
-	_, err = os.ReadFile(fileName)
+	err = os.Remove(fileName)
 	if err != nil {
-		file, err := os.Create(fileName)
-		if err != nil {
-			logrus.Fatal(err)
-		}
-		file.Close()
+		logrus.WithError(err).Info("trying to remove old options.json")
 	}
+
+	file, err := os.Create(fileName)
+	if err != nil {
+		logrus.Fatal(err)
+	}
+	defer file.Close()
 
 	err = os.WriteFile(fileName, bytes, 0700)
 	if err != nil {
